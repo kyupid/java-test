@@ -36,7 +36,7 @@ public class Shop {
     }
 
     private static List<String> findPrices(List<Shop> shops, String product) {
-        return shops.stream()
+        return shops.parallelStream()
                 .map(shop -> String.format("%s price is %.2f", shop.getName(), shop.getPrice(product)))
                 .collect(Collectors.toList());
     }
