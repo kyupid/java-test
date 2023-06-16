@@ -1,8 +1,8 @@
 package org.example;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class Shop {
@@ -39,6 +39,13 @@ public class Shop {
         return shops.parallelStream()
                 .map(shop -> String.format("%s price is %.2f", shop.getName(), shop.getPrice(product)))
                 .collect(Collectors.toList());
+    }
+
+    private static List<String> findPricesV2(List<Shop> shops, String product) {
+        List<CompletableFuture<String>> priceFutures = shops.stream()
+                .map(shop -> CompletableFuture.supplyAsync(() -> String.format("%s price is %.2f", shop.getName(), shop.getPrice(product))))
+                .collect(Collectors.toList());
+
     }
 
     public static void test(List<Shop> shops) {
