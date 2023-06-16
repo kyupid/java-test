@@ -35,22 +35,30 @@ public class Shop {
         }
     }
 
-    private static List<String> findPrices(List<Shop> shops, String product) {
-        return shops.parallelStream()
+    private static List<String> findPricesV1(List<Shop> shops, String product) {
+        return shops.stream()
                 .map(shop -> String.format("%s price is %.2f", shop.getName(), shop.getPrice(product)))
                 .collect(Collectors.toList());
     }
 
     private static List<String> findPricesV2(List<Shop> shops, String product) {
+        return shops.parallelStream()
+                .map(shop -> String.format("%s price is %.2f", shop.getName(), shop.getPrice(product)))
+                .collect(Collectors.toList());
+    }
+
+    private static List<String> findPricesV3(List<Shop> shops, String product) {
         List<CompletableFuture<String>> priceFutures = shops.stream()
                 .map(shop -> CompletableFuture.supplyAsync(() -> String.format("%s price is %.2f", shop.getName(), shop.getPrice(product))))
                 .collect(Collectors.toList());
-
+        return priceFutures.stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
     }
 
     public static void test(List<Shop> shops) {
         long start = System.nanoTime();
-        System.out.println(findPrices(shops, "myPhone27S"));
+        System.out.println(findPricesV3(shops, "myPhone27S"));
         long duration = (System.nanoTime() - start) / 1_000_000;
         System.out.println("Done in " + duration + " msecs");
     }
