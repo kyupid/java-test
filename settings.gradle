@@ -2,4 +2,5 @@ rootProject.name = 'java-test'
 include 'reactive-example'
 include 'modern-chatper15'
 include 'netty'
+include 'modern-chapter16'
 
