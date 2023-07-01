@@ -11,27 +11,35 @@ public class Main {
     public static void main(String[] args) {
         int portNumber = 8080;
         try (ServerSocket serverSocket = new ServerSocket(portNumber)){
-            Socket clientSocket = serverSocket.accept();
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                new Thread(() -> handleClient(clientSocket)).start();
+            }
+        } catch (IOException e) {
+            System.out.println("exception occurred");
+        }
+    }
 
+    private static void handleClient(Socket clientSocket) {
+        try {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             String request;
             String response;
 
-            while((request = in.readLine()) != null) {
+            while ((request = in.readLine()) != null) {
                 if ("Done".equals(request))
                     break;
                 response = getResponse(request);
                 out.println(response);
             }
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
-
     }
 
     private static String getResponse(String request) {
-        return "hello response";
+        return Thread.currentThread().getName();
     }
 }
