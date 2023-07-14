@@ -9,18 +9,20 @@ import java.net.Socket;
 
 public class Main {
     public static void main(String[] args) {
-        int portNumber = 8080;
+        int portNumber = 9999;
+        int count = 0;
         try (ServerSocket serverSocket = new ServerSocket(portNumber)){
-            while (true) {
+            while (count < 1000) {
                 Socket clientSocket = serverSocket.accept();
                 new Thread(() -> handleClient(clientSocket)).start();
+                count++;
             }
         } catch (IOException e) {
             System.out.println("exception occurred");
         }
     }
 
-    private static void handleClient(Socket clientSocket) {
+    private static void handleClient(Socket clientSocket) { // TODO 수정
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
