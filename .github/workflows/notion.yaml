@@ -1,0 +1,63 @@
+name: Notion Integration
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notion_integration:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Process commit messages and create Notion pages
+      env:
+        NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      run: |
+        import os
+        import re
+        import requests
+
+        def create_notion_page(content):
+            url = 'https://api.notion.com/v1/pages'
+            headers = {
+                'Authorization': f'Bearer {os.environ["NOTION_API_KEY"]}',
+                'Content-Type': 'application/json',
+                'Notion-Version': '2021-08-16'
+            }
+            response = requests.post(url, headers=headers, json=content)
+            print(response.text)
+
+        commit_messages = os.environ['COMMIT_MESSAGES'].split('\n')
+
+        for message in commit_messages:
+            # 지라 티켓 번호 추출
+            ticket_number = re.findall(r'[A-Z]+-\d+', message)
+            
+            # 특정 문자열 추출
+            components = re.findall(r'@(\w+)', message)
+            
+            if ticket_number and components:
+                notion_content = {
+                    "parent": {"database_id": os.environ['NOTION_DATABASE_ID']},
+                    "properties": {
+                        "지라 티켓": {"title": [{"text": {"content": ticket_number[0]}}]},
+                        "컴포넌트": {"multi_select": [{"name": component} for component in components]}
+                    }
+                }
+                create_notion_page(notion_content)
+      shell: python
