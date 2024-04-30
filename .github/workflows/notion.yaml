@@ -1,4 +1,4 @@
-name: Github-Notion-Jira Integration
+name: Github-Jira-Notion Integration
 
 on:
   push:
@@ -13,23 +13,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Jira 티켓 추출
+    - name: Extract Jira ticket number
       id: extract_jira_ticket
       run: |
         commit_message=$(git log -1 --pretty=%B)
         ticket_number=$(echo $commit_message | grep -oE 'JIRA-[0-9]+' | head -1)
-        echo "::set-output name=ticket_number::$ticket_number"
+        echo "TICKET_NUMBER=$ticket_number" >> "$GITHUB_ENV"
 
-    - name: Git 커밋 제목 내용 추출
+    - name: Extract commit title and summary
       id: extract_commit_info
       run: |
-        echo "::set-output name=title::$(git log -1 --pretty=%s)"
-        echo "::set-output name=summary::$(git log -1 --pretty=%b)"
+        echo "COMMIT_TITLE=$(git log -1 --pretty=%s)" >> "$GITHUB_ENV"
+        echo "COMMIT_SUMMARY=$(git log -1 --pretty=%b)" >> "$GITHUB_ENV"
 
-    - name: Notion 릴리즈 노트 작성
+    - name: Create Notion page
       env:
         NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
         NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
       run: |
         chmod +x .github/scripts/create_notion_page.sh
-        .github/scripts/create_notion_page.sh "${{ steps.extract_jira_ticket.outputs.ticket_number }}" "${{ steps.extract_commit_info.outputs.title }}" "${{ steps.extract_commit_info.outputs.summary }}"
+        .github/scripts/create_notion_page.sh "$TICKET_NUMBER" "$COMMIT_TITLE" "$COMMIT_SUMMARY"
