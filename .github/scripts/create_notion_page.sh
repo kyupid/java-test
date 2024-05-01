@@ -70,6 +70,10 @@ json_payload=$(cat <<EOF
 EOF
 )
 
+echo "JSON Payload:"
+echo "$json_payload"
+echo ""
+
 curl -X POST https://api.notion.com/v1/pages \
   -H "Authorization: Bearer $NOTION_API_KEY" \
   -H "Content-Type: application/json" \
