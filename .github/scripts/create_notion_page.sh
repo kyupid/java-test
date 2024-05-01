@@ -8,7 +8,7 @@ version=$5
 
 # 깃헙 이메일 기준으로 notion user id 읽기
 github_email=$(git log -1 --pretty=format:'%ae')
-notion_user_id=$(grep "$github_email" .github/db/notion-user-id-and-github-email-mapping.csv | cut -d',' -f1)
+notion_user_id=$(grep "$github_email" .github/db/notion-user-id.csv | cut -d',' -f1)
 
 # Prepare the JSON payload
 json_payload=$(cat <<EOF
