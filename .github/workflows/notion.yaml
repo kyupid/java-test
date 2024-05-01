@@ -1,4 +1,4 @@
-name: Github-Jira-Notion Integration
+name: Jira-Notion Integration
 
 on:
   push:
@@ -13,18 +13,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Extract Jira ticket number
-      id: extract_jira_ticket
+    - name: Extract Jira ticket number and module names
+      id: extract_info
       run: |
         commit_message=$(git log -1 --pretty=%B)
-        ticket_number=$(echo $commit_message | grep -oE 'JIRA-[0-9]+' | head -1)
+        ticket_number=$(echo $commit_message | grep -oE '[A-Z]+-[0-9]+' | head -1)
+        module_names=$(echo $commit_message | grep -oE '@[a-zA-Z]+' | tr -d '@')
         echo "TICKET_NUMBER=$ticket_number" >> "$GITHUB_ENV"
+        echo "MODULE_NAMES=$module_names" >> "$GITHUB_ENV"
 
     - name: Extract commit title and summary
       id: extract_commit_info
       run: |
-        echo "COMMIT_TITLE=$(git log -1 --pretty=%s)" >> "$GITHUB_ENV"
+        commit_title=$(git log -1 --pretty=%s | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | xargs)
+        echo "COMMIT_TITLE=$commit_title" >> "$GITHUB_ENV"
         echo "COMMIT_SUMMARY=$(git log -1 --pretty=%b)" >> "$GITHUB_ENV"
+
+    - name: Read version from properties file
+      id: read_properties
+      run: |
+        chmod +x .github/scripts/read_version.sh
+        .github/scripts/read_version.sh
 
     - name: Create Notion page
       env:
@@ -32,4 +41,4 @@ jobs:
         NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
       run: |
         chmod +x .github/scripts/create_notion_page.sh
-        .github/scripts/create_notion_page.sh "$TICKET_NUMBER" "$COMMIT_TITLE" "$COMMIT_SUMMARY"
+        .github/scripts/create_notion_page.sh "$TICKET_NUMBER" "$MODULE_NAMES" "$COMMIT_TITLE" "$COMMIT_SUMMARY" "$VERSION"
