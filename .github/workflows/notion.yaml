@@ -26,7 +26,7 @@ jobs:
       - name: Extract commit title and summary
         id: extract_commit_info
         run: |
-          commit_title=$(git log -1 --pretty=%s | sed -E 's/(\[A-Z\]+-\[0-9\]+|@\[a-zA-Z\]+)//g' | xargs)
+          commit_title=$(git log -1 --pretty=%s | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | sed -E 's/^[[:space:]]*|[[:space:]]*$//g')
           echo "COMMIT_TITLE=$commit_title" >> "$GITHUB_ENV"
           echo "COMMIT_SUMMARY=$(git log -1 --pretty=%b)" >> "$GITHUB_ENV"
 
