@@ -18,7 +18,7 @@ jobs:
         run: |
           commit_message=$(git log -1 --pretty=%B)
           ticket_number=$(echo $commit_message | grep -oE '[A-Z]+-[0-9]+' | head -1)
-          module_names=$(echo $commit_message | grep -oE '@[a-zA-Z가-힣]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
+          module_names=$(echo $commit_message | grep -oE '@[a-zA-Z]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
           echo "TICKET_NUMBER=$ticket_number" >> "$GITHUB_ENV"
           echo "MODULE_NAMES=$module_names" >> "$GITHUB_ENV"
 
