@@ -30,23 +30,27 @@ json_payload=$(cat <<EOF
         "name": "$version"
       }
     },
-    "모듈": {
-      "multi_select": [
-        $(echo $module_names | sed 's/\([^ ]*\)/{\"name\":"\1\"}/g' | sed 's/} {/}, {/g' | sed 's/}, {$/}/')
-      ]
-    },
-    "Jira": {
-      "rich_text": [
-        {
-          "text": {
-            "content": "$ticket_number",
-            "link": {
-              "url": "https://kyupid-labs.atlassian.net/browse/$ticket_number"
-            }
-          }
-        }
-      ]
-    },
+    $(if [ -n "$module_names" ]; then
+      echo "\"모듈\": {"
+      echo "  \"multi_select\": ["
+      echo "    $(echo $module_names | sed 's/\([^ ]*\)/{"name":"\1"}/g' | sed 's/} {/}, {/g' | sed 's/}, {$/}/')"
+      echo "  ]"
+      echo "},"
+    fi)
+    $(if [ -n "$ticket_number" ]; then
+      echo "\"Jira\": {"
+      echo "  \"rich_text\": ["
+      echo "    {"
+      echo "      \"text\": {"
+      echo "        \"content\": \"$ticket_number\","
+      echo "        \"link\": {"
+      echo "          \"url\": \"https://kyupid-labs.atlassian.net/browse/$ticket_number\""
+      echo "        }"
+      echo "      }"
+      echo "    }"
+      echo "  ]"
+      echo "},"
+    fi)
     "기능": {
       "title": [
         {
