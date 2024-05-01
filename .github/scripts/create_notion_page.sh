@@ -32,7 +32,7 @@ json_payload=$(cat <<EOF
     },
     "모듈": {
       "multi_select": [
-        $(echo $module_names | sed 's/\([^ ]*\)/{\"name\":"\1\"}/g' | tr '\n' ',' | sed 's/,$//')
+        $(echo $module_names | sed 's/\([^ ]*\)/{\"name\":"\1\"}/g' | sed 's/} {/}, {/g' | sed 's/}, {$/}/')
       ]
     },
     "Jira": {
