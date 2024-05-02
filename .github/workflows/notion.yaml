@@ -41,6 +41,7 @@ jobs:
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        if: env.TICKET_NUMBER != '' || env.MODULE_NAMES != ''
         run: |
           chmod +x .github/scripts/create_notion_page.sh
           .github/scripts/create_notion_page.sh "$TICKET_NUMBER" "$MODULE_NAMES" "$COMMIT_TITLE" "$COMMIT_SUMMARY" "$VERSION"
