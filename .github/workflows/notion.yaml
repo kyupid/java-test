@@ -37,26 +37,26 @@ jobs:
         run: |
           commits=${{ needs.get_commits.outputs.commits }}
           IFS=' ' read -ra commit_array <<< "$commits"
-          
+
           for commit in "${commit_array[@]}"
           do
             echo "Processing commit: $commit"
-            git checkout $commit
-          
+            git checkout "$commit"
+
             commit_message=$(git log -1 --pretty=%B)
             ticket_number=$(echo "$commit_message" | grep -oE '[A-Z]+-[0-9]+' | head -1)
             module_names=$(echo "$commit_message" | grep -oE '@[a-zA-Z]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
-          
+
             commit_title=$(git log -1 --pretty=%s | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | sed -E 's/^[[:space:]]*|[[:space:]]*$//g')
             commit_summary=$(git log -1 --pretty=%b | sed -z 's/\n/\\n/g')
-          
+
             chmod +x .github/scripts/read_version.sh
             version=$(.github/scripts/read_version.sh)
-          
+
             if [[ -n "$ticket_number" || -n "$module_names" ]]; then
               chmod +x .github/scripts/create_notion_page.sh
               .github/scripts/create_notion_page.sh "$ticket_number" "$module_names" "$commit_title" "$commit_summary" "$version"
             fi
-          
+
             sleep 1
           done
