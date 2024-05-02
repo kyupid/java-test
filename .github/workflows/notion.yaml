@@ -13,6 +13,15 @@ jobs:
     steps:
       - name: 깃 체크아웃
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 5
+      - name: 캐시 복원
+        uses: actions/cache@v2
+        with:
+          path: .git
+          key: ${{ runner.os }}-git-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-git-
       - name: 커밋 목록 가져오기
         id: get_commits_step
         run: |
@@ -27,6 +36,8 @@ jobs:
     steps:
       - name: 깃 체크아웃
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 5
       - name: 각각의 커밋 목록으로부터 노션 페이지 생성
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
