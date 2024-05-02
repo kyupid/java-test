@@ -18,15 +18,17 @@ jobs:
       - name: 커밋 목록 가져오기
         id: get_commits_step
         run: |
-          commits=$(git log --format=format:%H ${{ github.event.before }}..${{ github.event.after }})
-          echo "::set-output name=commits::$(echo $commits | tr ' ' ',')"
+          commits=$(git log --format=%H ${{ github.event.before }}..${{ github.event.after }})
+          commits=$(echo "$commits" | tr '\n' ',' | sed 's/,$//')
+          echo "commits=$commits" >> $GITHUB_OUTPUT
 
   create_notion_page:
     needs: get_commits
+    if: success() && needs.get_commits.result == 'success'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        commit: ${{ fromJson(needs.get_commits.outputs.commits) }}
+        commit: ${{ fromJson(format('["{0}"]', join(needs.get_commits.outputs.commits, '","'))) }}
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v2
