@@ -64,7 +64,7 @@ json_payload=$(cat <<EOF
       "rich_text": [
         {
           "text": {
-            "content": "$(echo "$commit_summary" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed 's/\n/\\n/g')"
+            "content": "$(echo "$commit_summary" | sed 's/"/\\"/g' | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g')"
           }
         }
       ]
