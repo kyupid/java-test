@@ -27,7 +27,9 @@ jobs:
         run: |
           commit_title=$(git log -1 --pretty=%s | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | sed -E 's/^[[:space:]]*|[[:space:]]*$//g')
           echo "COMMIT_TITLE=$commit_title" >> "$GITHUB_ENV"
-          echo "COMMIT_SUMMARY=$(git log -1 --pretty=%b)" >> "$GITHUB_ENV"
+          
+          commit_summary=$(git log -1 --pretty=%b | sed -z 's/\n/\\n/g')
+          echo "COMMIT_SUMMARY=$commit_summary" >> "$GITHUB_ENV"
 
       - name: Read version from properties file
         id: read_properties
