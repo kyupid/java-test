@@ -37,7 +37,7 @@ jobs:
         run: |
           commits=${{ needs.get_commits.outputs.commits }}
           IFS=' ' read -ra commit_array <<< "$commits"
-          echo  "HELLOWORLD: $commits"
+          echo  "SSSSS432: $commits"
           for commit in "${commit_array[@]}"
           do
             echo "Processing commit: $commit"
