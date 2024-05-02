@@ -17,14 +17,16 @@ json_payload=$(cat <<EOF
     "database_id": "$NOTION_DATABASE_ID"
   },
   "properties": {
-    "담당자": {
-      "people": [
-        {
-          "object": "user",
-          "id": "$notion_user_id"
-        }
-      ]
-    },
+    $(if [ -n "$notion_user_id" ]; then
+      echo "\"담당자\": {"
+      echo "  \"people\": ["
+      echo "    {"
+      echo "      \"object\": \"user\","
+      echo "      \"id\": \"$notion_user_id\""
+      echo "    }"
+      echo "  ]"
+      echo "},"
+    fi)
     "Version": {
       "select": {
         "name": "$version"
