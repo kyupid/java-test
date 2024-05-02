@@ -1,28 +1,40 @@
-name: Jira-Notion Integration
+name: 릴리즈 노트 자동 작성
 
 on:
   push:
     branches:
-      - main
+      - proto
 
 jobs:
   integration:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        commit: ${{ steps.get_commits.outputs.commits }}
 
     steps:
-      - name: Checkout code
+      - name: 코드 체크아웃
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      - name: Extract Jira ticket number and module names
+      - name: 커밋 목록 가져오기
+        id: get_commits
+        run: |
+          commits=$(git log --format=format:%H ${{ github.event.before }}..${{ github.event.after }})
+          echo "::set-output name=commits::$(echo $commits | tr ' ' ',')"
+
+      - name: 모듈 이름 및 지라 티켓 번호 추출
         id: extract_info
         run: |
+          git checkout ${{ matrix.commit }}
           commit_message=$(git log -1 --pretty=%B)
           ticket_number=$(echo $commit_message | grep -oE '[A-Z]+-[0-9]+' | head -1)
           module_names=$(echo $commit_message | grep -oE '@[a-zA-Z]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
           echo "TICKET_NUMBER=$ticket_number" >> "$GITHUB_ENV"
           echo "MODULE_NAMES=$module_names" >> "$GITHUB_ENV"
 
-      - name: Extract commit title and summary
+      - name: 커밋 title 및 summary 추출
         id: extract_commit_info
         run: |
           commit_title=$(git log -1 --pretty=%s | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | sed -E 's/^[[:space:]]*|[[:space:]]*$//g')
@@ -31,13 +43,13 @@ jobs:
           commit_summary=$(git log -1 --pretty=%b | sed -z 's/\n/\\n/g')
           echo "COMMIT_SUMMARY=$commit_summary" >> "$GITHUB_ENV"
 
-      - name: Read version from properties file
+      - name: 버전 추출 (v.properties + 1)
         id: read_properties
         run: |
           chmod +x .github/scripts/read_version.sh  
           .github/scripts/read_version.sh
 
-      - name: Create Notion page
+      - name: 노션 페이지 생성
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
