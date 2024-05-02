@@ -1,12 +1,10 @@
 #!/bin/bash
 
 version=$(grep '^VERSION' ./kyupid.server.common/src/main/java/io/kyupid/v.properties | cut -d'=' -f2 | xargs)
-echo "Version: $version"
 IFS='.' read -ra version_parts <<< "$version"
 major=${version_parts[0]}
 minor=${version_parts[1]}
 patch=${version_parts[2]}
-echo "Version2: $major.$minor.$patch"
 if [ $patch -eq 9 ]; then
   if [ $minor -eq 9 ]; then
     major=$((major + 1))
