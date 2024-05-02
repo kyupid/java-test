@@ -11,7 +11,7 @@ jobs:
     outputs:
       commits: ${{ steps.get_commits_step.outputs.commits }}
     steps:
-      - name: 코드 체크아웃
+      - name: 깃 체크아웃
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -27,11 +27,11 @@ jobs:
     if: success() && needs.get_commits.result == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: 코드 체크아웃
+      - name: 깃 체크아웃
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: 노션 페이지 생성
+      - name: 각각의 커밋 목록으로부터 노션 페이지 생성
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
