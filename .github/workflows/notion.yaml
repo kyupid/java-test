@@ -3,7 +3,7 @@ name: 릴리즈 노트 자동 작성
 on:
   push:
     branches:
-      - proto
+      - main
 
 jobs:
   integration:
