@@ -19,46 +19,42 @@ jobs:
         id: get_commits_step
         run: |
           commits=$(git log --format=%H ${{ github.event.before }}..${{ github.event.after }})
-          commits=$(echo "$commits" | tr '\n' ',' | sed 's/,$//')
-          echo "commits=$commits" >> $GITHUB_OUTPUT
+          echo "commits=$(echo $commits | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
   create_notion_page:
     needs: get_commits
     if: success() && needs.get_commits.result == 'success'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        commit: ${{ fromJson(format('["{0}"]', join(needs.get_commits.outputs.commits, '","'))) }}
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v2
-      - name: 특정 커밋으로 체크아웃
-        run: git checkout ${{ matrix.commit }}
-      - name: 모듈 이름 및 지라 티켓 번호 추출
-        id: extract_info
-        run: |
-          commit_message=$(git log -1 --pretty=%B)
-          ticket_number=$(echo $commit_message | grep -oE '[A-Z]+-[0-9]+' | head -1)
-          module_names=$(echo $commit_message | grep -oE '@[a-zA-Z]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
-          echo "TICKET_NUMBER=$ticket_number" >> "$GITHUB_ENV"
-          echo "MODULE_NAMES=$module_names" >> "$GITHUB_ENV"
-      - name: 커밋 title 및 summary 추출
-        id: extract_commit_info
-        run: |
-          commit_title=$(git log -1 --pretty=%s | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | sed -E 's/^[[:space:]]*|[[:space:]]*$//g')
-          echo "COMMIT_TITLE=$commit_title" >> "$GITHUB_ENV"
-          commit_summary=$(git log -1 --pretty=%b | sed -z 's/\n/\\n/g')
-          echo "COMMIT_SUMMARY=$commit_summary" >> "$GITHUB_ENV"
-      - name: 버전 추출 (v.properties + 1)
-        id: read_properties
-        run: |
-          chmod +x .github/scripts/read_version.sh
-          .github/scripts/read_version.sh
       - name: 노션 페이지 생성
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-        if: env.TICKET_NUMBER != '' || env.MODULE_NAMES != ''
         run: |
-          chmod +x .github/scripts/create_notion_page.sh
-          .github/scripts/create_notion_page.sh "$TICKET_NUMBER" "$MODULE_NAMES" "$COMMIT_TITLE" "$COMMIT_SUMMARY" "$VERSION"
+          commits=${{ needs.get_commits.outputs.commits }}
+          IFS=' ' read -ra commit_array <<< "$commits"
+          
+          for commit in "${commit_array[@]}"
+          do
+            echo "Processing commit: $commit"
+            git checkout $commit
+          
+            commit_message=$(git log -1 --pretty=%B)
+            ticket_number=$(echo $commit_message | grep -oE '[A-Z]+-[0-9]+' | head -1)
+            module_names=$(echo $commit_message | grep -oE '@[a-zA-Z]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
+          
+            commit_title=$(git log -1 --pretty=%s | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | sed -E 's/^[[:space:]]*|[[:space:]]*$//g')
+            commit_summary=$(git log -1 --pretty=%b | sed -z 's/\n/\\n/g')
+          
+            chmod +x .github/scripts/read_version.sh
+            version=$(.github/scripts/read_version.sh)
+          
+            if [[ -n "$ticket_number" || -n "$module_names" ]]; then
+              chmod +x .github/scripts/create_notion_page.sh
+              .github/scripts/create_notion_page.sh "$ticket_number" "$module_names" "$commit_title" "$commit_summary" "$version"
+            fi
+          
+            sleep 1
+          done
