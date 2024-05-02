@@ -19,7 +19,8 @@ jobs:
         id: get_commits_step
         run: |
           commits=$(git log --format=%H ${{ github.event.before }}..${{ github.event.after }})
-          echo "commits=$(echo $commits | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          commits=$(echo "$commits" | tr '\n' ',')
+          echo "commits=${commits}" >> $GITHUB_OUTPUT
 
   create_notion_page:
     needs: get_commits
@@ -36,8 +37,7 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: |
           commits=${{ needs.get_commits.outputs.commits }}
-          IFS=' ' read -ra commit_array <<< "$commits"
-          echo  "SSSSS432: $commits"
+          IFS=',' read -ra commit_array <<< "$commits"
           for commit in "${commit_array[@]}"
           do
             echo "Processing commit: $commit"
