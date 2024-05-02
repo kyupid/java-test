@@ -52,6 +52,7 @@ jobs:
 
             chmod +x .github/scripts/read_version.sh
             version=$(.github/scripts/read_version.sh)
+          
             if [[ -n "$ticket_number" || -n "$module_names" ]]; then
               chmod +x .github/scripts/create_notion_page.sh
               .github/scripts/create_notion_page.sh "$ticket_number" "$module_names" "$commit_title" "$commit_summary" "$version"

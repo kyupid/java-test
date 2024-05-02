@@ -19,4 +19,4 @@ else
 fi
 
 updated_version="$major.$minor.$patch"
-echo "VERSION=$updated_version" >> "$GITHUB_ENV"
+echo "$updated_version"
