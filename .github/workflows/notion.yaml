@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: 노션 페이지 생성
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
@@ -42,8 +44,8 @@ jobs:
             git checkout $commit
           
             commit_message=$(git log -1 --pretty=%B)
-            ticket_number=$(echo $commit_message | grep -oE '[A-Z]+-[0-9]+' | head -1)
-            module_names=$(echo $commit_message | grep -oE '@[a-zA-Z]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
+            ticket_number=$(echo "$commit_message" | grep -oE '[A-Z]+-[0-9]+' | head -1)
+            module_names=$(echo "$commit_message" | grep -oE '@[a-zA-Z]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
           
             commit_title=$(git log -1 --pretty=%s | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | sed -E 's/^[[:space:]]*|[[:space:]]*$//g')
             commit_summary=$(git log -1 --pretty=%b | sed -z 's/\n/\\n/g')
