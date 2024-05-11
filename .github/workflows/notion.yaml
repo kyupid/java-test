@@ -31,31 +31,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 5
-      - name: 각각의 커밋 목록으로부터 노션 페이지 생성
+      - name: Python 스크립트 실행
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: |
           commits=${{ needs.get_commits.outputs.commits }}
-          IFS=',' read -ra commit_array <<< "$commits"
-          for commit in "${commit_array[@]}"
-          do
-            echo "Processing commit: $commit"
-
-            commit_message=$(git log -1 --pretty=%B $commit)
-            ticket_number=$(echo "$commit_message" | grep -oE '[A-Z]+-[0-9]+' | head -1)
-            module_names=$(echo "$commit_message" | grep -oE '@[a-zA-Z]+' | tr -d '@' | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
-
-            commit_title=$(git log -1 --pretty=%s $commit | sed -E 's/([A-Z]+-[0-9]+|@[a-zA-Z]+)//g' | sed -E 's/^[[:space:]]*|[[:space:]]*$//g')
-            commit_summary=$(git log -1 --pretty=%b $commit | sed -z 's/\n/\\n/g')
-
-            chmod +x .github/scripts/read_version.sh
-            version=$(.github/scripts/read_version.sh)
-
-            if [[ -n "$ticket_number" || -n "$module_names" ]]; then
-              chmod +x .github/scripts/create_notion_page.sh
-              .github/scripts/create_notion_page.sh "$ticket_number" "$module_names" "$commit_title" "$commit_summary" "$version"
-            fi
-
-            sleep 1
-          done
+          python .github/scripts/create_notion_pages.py "$commits"
