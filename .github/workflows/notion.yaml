@@ -13,20 +13,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v44.3.0
-
-      - name: Get commit info
-        id: commit-info
+      - name: Get all commits
+        id: get-commits
         run: |
-          echo "commits=${{ steps.changed-files.outputs.all_modified_files }}" >> $GITHUB_OUTPUT
+          commits=$(echo '${{ join(github.event.commits.*.id, ',') }}')
+          echo "commits=$commits" >> $GITHUB_OUTPUT
 
       - name: Create Notion pages
-        if: steps.commit-info.outputs.commits != ''
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: |
-          commits=${{ steps.commit-info.outputs.commits }}
-          python .github/scripts/main.py "$commits"
+          python .github/scripts/create_notion_pages.py "${{ steps.get-commits.outputs.commits }}"
