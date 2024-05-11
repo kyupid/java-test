@@ -6,35 +6,27 @@ on:
       - main
 
 jobs:
-  get_commits:
-    runs-on: ubuntu-latest
-    outputs:
-      commits: ${{ steps.get_commits_step.outputs.commits }}
-    steps:
-      - name: 깃 체크아웃
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 5
-      - name: 커밋 목록 가져오기
-        id: get_commits_step
-        run: |
-          commits=$(git log --format=%H ${{ github.event.before }}..${{ github.event.after }})
-          commits=$(echo "$commits" | tr '\n' ',')
-          echo "commits=${commits}" >> $GITHUB_OUTPUT
-
   create_notion_page:
-    needs: get_commits
-    if: success() && needs.get_commits.result == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: 깃 체크아웃
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 5
-      - name: Python 스크립트 실행
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v23
+
+      - name: Get commit info
+        id: commit-info
+        run: |
+          echo "commits=${{ steps.changed-files.outputs.all_modified_files }}" >> $GITHUB_OUTPUT
+
+      - name: Create Notion pages
+        if: steps.commit-info.outputs.commits != ''
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: |
-          commits=${{ needs.get_commits.outputs.commits }}
-          python .github/scripts/main.py "$commits"
+          commits=${{ steps.commit-info.outputs.commits }}
+          python .github/scripts/create_notion_pages.py "$commits"
