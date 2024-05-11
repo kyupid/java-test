@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 
 ticket_number=$1
 module_names=$2
