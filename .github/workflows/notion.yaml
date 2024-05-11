@@ -37,4 +37,4 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: |
           commits=${{ needs.get_commits.outputs.commits }}
-          python .github/scripts/create_notion_pages.py "$commits"
+          python .github/scripts/main.py "$commits"
