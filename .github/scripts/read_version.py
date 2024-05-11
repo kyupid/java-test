@@ -2,7 +2,7 @@ import re
 import os
 
 def read_version():
-    file_path = "/Users/kyu/Documents/java-test/kyupid.server.common/src/main/java/io/kyupid/v.properties"
+    file_path = "./kyupid.server.common/src/main/java/io/kyupid/v.properties"
     if os.path.isfile(file_path):
         with open(file_path, 'r') as file:
             content = file.read()

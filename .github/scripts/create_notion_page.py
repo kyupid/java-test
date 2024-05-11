@@ -10,7 +10,7 @@ def create_notion_page(ticket_number, module_names, commit_title, commit_summary
     github_email = os.popen("git log -1 --pretty=format:'%ae'").read().strip()
     notion_user_id = None
 
-    with open('/Users/kyu/Documents/java-test/.github/db/notion-user-id.csv', 'r') as file:
+    with open('.github/db/notion-user-id.csv', 'r') as file:
         csv_reader = csv.reader(file)
         for row in csv_reader:
             if len(row) >= 2 and row[1] == github_email:
