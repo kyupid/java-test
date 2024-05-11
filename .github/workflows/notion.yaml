@@ -15,9 +15,7 @@ jobs:
 
       - name: Get all commits
         id: get-commits
-        run: |
-          commits=$(echo '${{ join(github.event.commits.*.id, ',') }}')
-          echo "commits=$commits" >> $GITHUB_OUTPUT
+        run: echo "commits=${{ join(github.event.commits.*.id, ',') }}" >> $GITHUB_OUTPUT
 
       - name: Create Notion pages
         env:
