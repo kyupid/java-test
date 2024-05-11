@@ -9,10 +9,6 @@ jobs:
   create_notion_page:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.5
-        with:
-          fetch-depth: 0
-
       - name: Get all commits
         id: get-commits
         run: echo "commits=${{ join(github.event.commits.*.id, ',') }}" >> $GITHUB_OUTPUT
