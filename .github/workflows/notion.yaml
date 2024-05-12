@@ -18,4 +18,4 @@ jobs:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: |
-          python .github/scripts/main.py "${{ steps.get-commits.outputs.commits }}"
+          python "$GITHUB_WORKSPACE.github/scripts/main.py" "${{ steps.get-commits.outputs.commits }}"
