@@ -16,11 +16,6 @@ jobs:
         id: get-commits
         run: echo "commits=${{ join(github.event.commits.*.id, ',') }}" >> $GITHUB_OUTPUT
 
-      - name: Debug workspace structure
-        run: |
-          echo "Workspace structure:"
-          tree "$GITHUB_WORKSPACE"
-
       - name: Create Notion pages
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
