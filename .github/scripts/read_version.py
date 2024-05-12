@@ -29,10 +29,3 @@ def update_version(version):
     else:
         patch += 1
     return f"{major}.{minor}.{patch}"
-
-if __name__ == "__main__":
-    updated_version = read_version()
-    if updated_version:
-        print(updated_version)
-    else:
-        print("No version found in v.properties file.")
