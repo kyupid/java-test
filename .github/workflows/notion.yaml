@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.1.5
+        with:
+          fetch-depth: 5  # 최근 5개 커밋만 가져옴
 
       - name: Get all commits
         id: get-commits
