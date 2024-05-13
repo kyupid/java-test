@@ -11,15 +11,14 @@ def main():
         if commit:
             print(f"Processing commit: {commit}")
 
-            commit_message = os.popen(f"git log -1 --pretty=%B {commit}").read()
-            ticket_number = re.search(r'[A-Z]+-[0-9]+', commit_message)
+            commit_title = os.popen(f"git log -1 --pretty=%s {commit}").read().strip()
+            ticket_number = re.search(r'[A-Z]+-[0-9]+', commit_title)
             if ticket_number:
                 ticket_number = ticket_number.group()
-            module_names = re.findall(r'@[a-zA-Z]+', commit_message)
+            module_names = re.findall(r'@[a-zA-Z]+', commit_title)
             module_names = [name.replace('@', '').upper() for name in module_names]
             module_names = ' '.join(module_names)
 
-            commit_title = os.popen(f"git log -1 --pretty=%s {commit}").read().strip()
             commit_title = re.sub(r'([A-Z]+-[0-9]+|@[a-zA-Z]+)', '', commit_title).strip()
             commit_summary = os.popen(f"git log -1 --pretty=%b {commit}").read()
 
