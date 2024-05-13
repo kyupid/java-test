@@ -16,7 +16,7 @@ def main():
             if ticket_number:
                 ticket_number = ticket_number.group()
             module_names = re.findall(r'@[a-zA-Z]+', commit_title)
-            module_names = [name.replace('@', '').upper() for name in module_names]
+            module_names = [name.replace('@', '').upper() for name in module_names if name.upper() != '@BILLING']
             module_names = ' '.join(module_names)
 
             commit_title = re.sub(r'([A-Z]+-[0-9]+|@[a-zA-Z]+)', '', commit_title).strip()
@@ -25,10 +25,7 @@ def main():
             version = read_version()
 
             if ticket_number or module_names:
-                if 'BILLING' not in module_names:
-                    create_notion_page(ticket_number, module_names, commit_title, commit_summary, version)
-                else:
-                    print("Skipping commit due to the presence of the 'BILLING' module.")
+                create_notion_page(ticket_number, module_names, commit_title, commit_summary, version)
 
             time.sleep(1)
 
