@@ -25,7 +25,10 @@ def main():
             version = read_version()
 
             if ticket_number or module_names:
-                create_notion_page(ticket_number, module_names, commit_title, commit_summary, version)
+                if 'BILLING' not in module_names:
+                    create_notion_page(ticket_number, module_names, commit_title, commit_summary, version)
+                else:
+                    print("Skipping commit due to the presence of the 'BILLING' module.")
 
             time.sleep(1)
 
